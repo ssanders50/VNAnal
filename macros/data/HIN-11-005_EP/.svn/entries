@@ -1,0 +1,49 @@
+10
+
+dir
+222015
+svn+ssh://ssanders@svn.cern.ch/reps/tdr2/notes/AN-11-122/trunk/data_tables/EP_Results
+svn+ssh://ssanders@svn.cern.ch/reps/tdr2
+
+
+
+2013-10-17T22:57:20.524087Z
+212294
+ssanders
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+4525493e-7705-40b1-a816-d608a930855b
+
+EtaDists
+dir
+
+Integral_1to3GeVc
+dir
+
+Integral_1.2to1.6GeVc
+dir
+
+Integral
+dir
+
+VNSpectra
+dir
+
+PtDists
+dir
+
+Rescor
+dir
+
