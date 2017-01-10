@@ -21,26 +21,31 @@ int epord_ = 2.;
 bool trkoff = true;
 bool RECENTERTRACKS = false;
 
-static const int MaxFiles = 1000;
+static const int MaxFiles = 200;
+static const double MaxCent = 70;
 static const int MaxEvents = -1;
 static const int ntrkbins = 15;
 static const double trkBins[]={0,20,30,40,50,60,80,100,120,150,185,220,260,300,350,500};
 static const int ncentbins = 12;
 static const double centBins[]={0,5,10,15,20,25,30,35,40,45,50,60,70};
-static const int nanals = 28;
+static const int nanals = 38;
 enum AnalType {
-  N2SUB2,   N2SUB3,    N3SUB2,   N3SUB3,   N4SUB2,  N4SUB3,  
-  N42SUB2,  N42SUB3,   N5SUB2,   N5SUB3,   N6SUB2,  N6SUB3,   
-  N7SUB2,   N7SUB3,    N523SUB2, N523SUB3, N723SUB2,N723SUB3, 
-  N63SUB2,  N63SUB3,   D24SUB2,  D24SUB3,  D34SUB2, D34SUB3,   
-  D2232SUB2,D2232SUB3, D2432SUB2, D2432SUB3
+  N2SUB2,       N2SUB3,      N3SUB2,     N3SUB3,     N4SUB2,      N4SUB3,  
+  N42SUB2,      N42SUB3,     N5SUB2,     N5SUB3,     N6SUB2,      N6SUB3,   
+  N7SUB2,       N7SUB3,      N523SUB2,   N523SUB3,   N723SUB2,    N723SUB3,
+  N723ASUB2,    N723ASUB3,   N62SUB2,    N62SUB3,    N63SUB2,     N63SUB3,  
+  D24SUB2,      D24SUB3,     D34SUB2,    D34SUB3,    D2232SUB2,   D2232SUB3,
+  D2432SUB2,    D2432SUB3,   D2232ASUB2, D2232ASUB3, D2432ASUB2,  D2432ASUB3,
+  N523ASUB2,    N523ASUB3
 };
 string AnalNames[]={
-  "N2SUB2",   "N2SUB3",    "N3SUB2",   "N3SUB3",   "N4SUB2",  "N4SUB3",  
-  "N42SUB2",  "N42SUB3",   "N5SUB2",   "N5SUB3",   "N6SUB2",  "N6SUB3",   
-  "N7SUB2",   "N7SUB3",    "N523SUB2", "N523SUB3", "N723SUB2","N723SUB3", 
-  "N63SUB2",  "N63SUB3",   "D24SUB2",  "D24SUB3",  "D34SUB2", "D34SUB3",   
-  "D2232SUB2","D2232SUB3", "D2432SUB2","D2432SUB3"
+  "N2SUB2",       "N2SUB3",      "N3SUB2",     "N3SUB3",     "N4SUB2",      "N4SUB3",  
+  "N42SUB2",      "N42SUB3",     "N5SUB2",     "N5SUB3",     "N6SUB2",      "N6SUB3",   
+  "N7SUB2",       "N7SUB3",      "N523SUB2",   "N523SUB3",   "N723SUB2",    "N723SUB3",
+  "N723ASUB2",    "N723ASUB3",   "N62SUB2",    "N62SUB3",    "N63SUB2",     "N63SUB3",  
+  "D24SUB2",      "D24SUB3",     "D34SUB2",    "D34SUB3",    "D2232SUB2",   "D2232SUB3",
+  "D2432SUB2",    "D2432SUB3",   "D2232ASUB2", "D2232ASUB3", "D2432ASUB2",  "D2432ASUB3",
+  "N523ASUB2",    "N523ASUB3"
 };
 int ANAL;
 int epa;
@@ -113,6 +118,7 @@ Int_t NumEvents[40];
 Int_t TotNumEvents; 
 TString KeyNames[40];
 int NumKeys;
+
 string reac_;
 //----------------------------------
 #include "src/GenSupport.h"
@@ -221,6 +227,7 @@ void ReadTree(GetEventInfo * info, string prename, TString trig, TString trig2, 
 	    }
 	    tree->GetEntry(ievent);
 	    if(fabs(vtx)>15.) continue;
+	    if(centval>MaxCent) continue;
 	    int bin = -1;      
 	    if(trkoff) {
 	      bin =  trkbins->FindBin(noff)-1;
@@ -288,7 +295,8 @@ void ReadTree(GetEventInfo * info, string prename, TString trig, TString trig2, 
 	tree->SetBranchAddress("RescorErr",  &rescorErr);
 	tree->SetBranchAddress(Form("qxtrk_v%d",epord_),      &qxtrk_);
 	tree->SetBranchAddress(Form("qytrk_v%d",epord_),      &qytrk_);
-	if(ANAL==D2232SUB2 || ANAL==D2432SUB2||ANAL==D2232SUB3 || ANAL==D2432SUB3) {
+	if(ANAL==D2232SUB2 || ANAL==D2432SUB2||ANAL==D2232SUB3 || ANAL==D2432SUB3 || 
+	   ANAL==D2232ASUB2 || ANAL==D2432ASUB2||ANAL==D2232ASUB3 || ANAL==D2432ASUB3) {
 	  tree->SetBranchAddress("qxtrk_v3",      &qxtrk3_);
 	  tree->SetBranchAddress("qytrk_v3",      &qytrk3_);
 	}
@@ -302,6 +310,7 @@ void ReadTree(GetEventInfo * info, string prename, TString trig, TString trig2, 
 	  }
 	  tree->GetEntry(ievent);
 	  if(fabs(vtx)>15.) continue;
+	  if(centval>MaxCent) continue;
 	  int bin = -1; 
 	  if(trkoff) {
 	    bin =  trkbins->FindBin(noff)-1;
@@ -319,20 +328,22 @@ void ReadTree(GetEventInfo * info, string prename, TString trig, TString trig2, 
 	  if(trkoff) evtchar = noff;
 	  int j=0;
 
-	  if(ANAL==D2232SUB2 ||ANAL==D2232SUB3 ) {
+	  if(ANAL==D2232SUB2 ||ANAL==D2232SUB3 || ANAL==D2232ASUB2 ||ANAL==D2232ASUB3) {
 	    TH2D * qxt = (TH2D *) qxtrk_->Clone("qxt");
 	    TH2D * qyt = (TH2D *) qytrk_->Clone("qyt");
 	    qxt->Reset();
 	    qyt->Reset();
 	    for(int ix = 1; ix<=qxt->GetNbinsX(); ix++) {
 	      for(int jy = 1; jy<=qyt->GetNbinsY(); jy++) {
-		double a = qxtrk_->GetBinContent(ix,jy);
-		double b = qytrk_->GetBinContent(ix,jy);
-		double c = qxtrk3_->GetBinContent(ix,jy);
-		double d = qytrk3_->GetBinContent(ix,jy);
-		qxt->SetBinContent(ix,jy,a*c-b*d);
-		qyt->SetBinContent(ix,jy,b*c+a*d);
-		qcnt_->SetBinContent(ix,jy,pow(qcnt_->GetBinContent(ix,jy),2));
+		if(qcnt_->GetBinContent(ix,jy)>0) {
+		  double a = qxtrk_->GetBinContent(ix,jy);
+		  double b = qytrk_->GetBinContent(ix,jy);
+		  double c = qxtrk3_->GetBinContent(ix,jy);
+		  double d = qytrk3_->GetBinContent(ix,jy);
+		  qxt->SetBinContent(ix,jy,a*c-b*d);
+		  qyt->SetBinContent(ix,jy,b*c+a*d);
+		  //qcnt_->SetBinContent(ix,jy,pow(qcnt_->GetBinContent(ix,jy),2));
+		}
 	      }
 	    }
 	    genp[bin][j]->add(qxt,qyt,qcnt_,qx,qy,sumw,avpt_,evtchar,qxav[bin],qyav[bin]);
@@ -342,23 +353,25 @@ void ReadTree(GetEventInfo * info, string prename, TString trig, TString trig2, 
 	    genm[bin][j]->add(qxt,qyt,qcnt_,qx,qy,sumw,avpt_,evtchar,qxav[bin],qyav[bin]);
 	    qxt->Delete();
 	    qyt->Delete();
-	  } else if (ANAL==D2432SUB2||ANAL==D2432SUB3){
+	  } else if (ANAL==D2432SUB2||ANAL==D2432SUB3 || ANAL==D2432ASUB2||ANAL==D2432ASUB3 ){
 	    TH2D * qxt = (TH2D *) qxtrk_->Clone("qxt");
 	    TH2D * qyt = (TH2D *) qytrk_->Clone("qyt");
 	    qxt->Reset();
 	    qyt->Reset();
 	    for(int ix = 1; ix<=qxt->GetNbinsX(); ix++) {
 	      for(int jy = 1; jy<=qyt->GetNbinsY(); jy++) {
-		double a = qxtrk_->GetBinContent(ix,jy);
-		double b = qytrk_->GetBinContent(ix,jy);
-		double c = qxtrk3_->GetBinContent(ix,jy);
-		double d = qytrk3_->GetBinContent(ix,jy);
-
-		double cc = a*c - b*d;
-		double dd = b*c + a*d;
-		qxt->SetBinContent(ix,jy,a*cc-b*dd);
-		qyt->SetBinContent(ix,jy,b*cc+a*dd);
-		qcnt_->SetBinContent(ix,jy,pow(qcnt_->GetBinContent(ix,jy),3));
+		if(qcnt_->GetBinContent(ix,jy)>0) {
+		  double a = qxtrk_->GetBinContent(ix,jy);
+		  double b = qytrk_->GetBinContent(ix,jy);
+		  double c = qxtrk3_->GetBinContent(ix,jy);
+		  double d = qytrk3_->GetBinContent(ix,jy);
+		  
+		  double cc = a*c - b*d;
+		  double dd = b*c + a*d;
+		  qxt->SetBinContent(ix,jy,a*cc-b*dd);
+		  qyt->SetBinContent(ix,jy,b*cc+a*dd);
+		  //qcnt_->SetBinContent(ix,jy,pow(qcnt_->GetBinContent(ix,jy),3));
+		} 
 	      }
 	    }
 	    genp[bin][j]->add(qxt,qyt,qcnt_,qx,qy,sumw,avpt_,evtchar,qxav[bin],qyav[bin]);
@@ -429,8 +442,17 @@ void GetNumEvents(string prename, TString trig, TString trig2, TString trig3){
       for(int i = 0; i<nkeys; i++) {
 	TTree * tree = (TTree *) tfin->Get(Form("%s/tree",flist->At(i)->GetName()));
 	if(NumKeys==0) KeyNames[i] = flist->At(i)->GetName();
-	NumEvents[i] += tree->GetEntries();
-	TotNumEvents += tree->GetEntries();
+
+
+	for(int ievent = 0; ievent<tree->GetEntries(); ievent++) {
+	  tree->GetEntry(ievent);
+	  if(fabs(vtx)>15.) continue;
+	  if(centval>MaxCent) continue;
+	  ++NumEvents[i];
+	  ++TotNumEvents;;
+	}
+	  //NumEvents[i] += tree->GetEntries();
+	  //TotNumEvents += tree->GetEntries();
 	cout<<KeyNames[i].Data()<<"\t"<<tree->GetEntries()<<"\t"<<NumEvents[i]<<"\t"<<inFile.Data()<<endl;
       }
       if(NumKeys==0) NumKeys = nkeys;
