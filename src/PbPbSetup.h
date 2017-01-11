@@ -75,6 +75,16 @@ if(reac.Contains("PbPb")){
     epb = hi::HFm2;
     epc = hi::trackmid2;
   }
+  if(anal=="N62SUB2" || anal=="N62SUB3" ) {
+    epord_ = 6;
+    trig  = "crab_PbPb_2015_v6_A";
+    trig2 = "crab_PbPb_2015_v6_B";
+    trig3 = "crab_PbPb_2015_v6_C";
+    mid2n = "trackmid2";
+    epa = hi::HFp2;
+    epb = hi::HFm2;
+    epc = hi::trackmid2;
+  }
   if(anal=="N523SUB2" || anal=="N523SUB3" ) {
     epord_ = 5;
     trig  = "crab_PbPb_2015_v5_A";
@@ -84,6 +94,22 @@ if(reac.Contains("PbPb")){
     epa = hi::HFp2;
     epb = hi::HFm2;
     epc = hi::trackmid2;
+    ep3a = hi::HFp3;
+    ep3b = hi::HFm3;
+    ep3c = hi::trackmid3;
+  }
+  if(anal=="N523ASUB2" || anal=="N523ASUB3" ) {
+    epord_ = 5;
+    trig  = "crab_PbPb_2015_v5_A";
+    trig2 = "crab_PbPb_2015_v5_B";
+    trig3 = "crab_PbPb_2015_v5_C";
+    mid2n = "trackmid2";
+    epa = hi::HFp2;
+    epb = hi::HFm2;
+    epc = hi::trackmid2;
+    ep3a = hi::HFm3;
+    ep3b = hi::HFp3;
+    ep3c = hi::trackmid3;
   }
   if(anal=="N723SUB2" || anal=="N723SUB3" ) {
     epord_ = 7;
@@ -94,6 +120,19 @@ if(reac.Contains("PbPb")){
     epa = hi::HFp2;
     epb = hi::HFm2;
     epc = hi::trackmid2;
+  }
+  if(anal=="N723ASUB2" || anal=="N723ASUB3" ) {
+    epord_ = 7;
+    trig  = "crab_PbPb_2015_v7_A";
+    trig2 = "crab_PbPb_2015_v7_B";
+    trig3 = "crab_PbPb_2015_v7_C";
+    mid2n = "trackmid2";
+    epa = hi::HFp2;
+    epb = hi::HFm2;
+    epc = hi::trackmid2;
+    ep3a = hi::HFm3;
+    ep3b = hi::HFp3;
+    ep3c = hi::trackmid3;
   }
   if(anal=="N63SUB2" || anal=="N63SUB3" ) {
     epord_ = 6;
@@ -115,6 +154,19 @@ if(reac.Contains("PbPb")){
     epb = hi::HFm2;
     epc = hi::trackmid2;
   }
+  if(anal=="D2232ASUB2" || anal=="D2232ASUB3" ) {
+    epord_ = 2;
+    trig  = "crab_PbPb_2015_v2_v3_A";
+    trig2 = "crab_PbPb_2015_v2_v3_B";
+    trig3 = "crab_PbPb_2015_v2_v3_C";
+    mid2n = "trackmid2";
+    epa = hi::HFp2;
+    epb = hi::HFm2;
+    epc = hi::trackmid2;
+    ep3a = hi::HFm3;
+    ep3b = hi::HFp3;
+    ep3c = hi::trackmid3;
+  }
   if(anal=="D2432SUB2" || anal=="D2432SUB3" ) {
     epord_ = 2;
     trig  = "crab_PbPb_2015_v2_v3_A";
@@ -124,5 +176,18 @@ if(reac.Contains("PbPb")){
     epa = hi::HFp2;
     epb = hi::HFm2;
     epc = hi::trackmid2;
+  }
+  if(anal=="D2432ASUB2" || anal=="D2432ASUB3" ) {
+    epord_ = 2;
+    trig  = "crab_PbPb_2015_v2_v3_A";
+    trig2 = "crab_PbPb_2015_v2_v3_B";
+    trig3 = "crab_PbPb_2015_v2_v3_C";
+    mid2n = "trackmid2";
+    epa = hi::HFp2;
+    epb = hi::HFm2;
+    epc = hi::trackmid2;
+    ep3a = hi::HFm3;
+    ep3b = hi::HFp3;
+    ep3c = hi::trackmid3;
   }
  }

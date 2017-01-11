@@ -10,6 +10,8 @@ void Setup(string analtype, GetEventInfo * info){
   if(info->isPbPb2015pixel()) trkoff = false;
   cout<<"setup with epord_: "<<epord_<<" ANAL: "<<AnalNames[ANAL].data()<<endl;
   int nbins = 0;
+  cout<<"MaxFiles: "<<MaxFiles<<endl;
+  cout<<"MaxCent: "<<MaxCent<<endl;
   if(trkoff) {
     nbins = ntrkbins;
     cout<<"Use NtrkOff binning"<<endl;

@@ -77,12 +77,14 @@ class Qvec {
   double rQAC2;
   double rQBC2;
   double rQnA2;
+  double sumw;
 
   string name_;
   int ptbin_;
   int etabin_;
   int nevts;
   int ncount;
+  int avptcount;
   double rescor;
   double avnoff;
   double avpt;
@@ -105,6 +107,7 @@ Qvec::Qvec(int ptbin, int etabin, string name){
   name_ = name;
   nevts = 0;
   ncount = 0;
+  sumw = 0;
   wnAsum=0;
   wABsum=0;
   wACsum=0;
@@ -147,11 +150,13 @@ Qvec::Qvec(int ptbin, int etabin, string name){
   qclost = 0;
   rescor = -1;
   avpt = 0;
+  avptcount = 0;
   twosub = false;
-  if(ANAL == N2SUB2 || ANAL == N3SUB2 || ANAL == N4SUB2 || ANAL==N42SUB2 ||
-     ANAL == N5SUB2 || ANAL == N6SUB2 || ANAL == N7SUB2 || ANAL==N523SUB2 ||
-     ANAL == N63SUB2|| ANAL == N723SUB2 || ANAL == D24SUB2 || ANAL == D34SUB2 ||
-     ANAL == D2232SUB2 || ANAL == D2432SUB2) {
+  if(ANAL == N2SUB2    || ANAL == N3SUB2     || ANAL == N4SUB2     || ANAL == N42SUB2    ||
+     ANAL == N5SUB2    || ANAL == N6SUB2     || ANAL == N7SUB2     || ANAL == N523SUB2   || 
+     ANAL == N523ASUB2 || ANAL == N63SUB2    || ANAL == N723SUB2   || ANAL == N723ASUB2  || 
+     ANAL == D24SUB2   || ANAL == D34SUB2    || ANAL == D2232SUB2  || ANAL == D2232ASUB2 || 
+     ANAL == D2432SUB2 || ANAL == D2432ASUB2 || ANAL==N62SUB2) {
     twosub = true;
   }
 }
@@ -161,6 +166,9 @@ void Qvec::add(int imult, comp Qn,
 	       comp Q3A, double w3A, comp Q3B, double w3B,  comp Q3C, double w3C, 
 	       double pt, int noff) {
   ++totevents;
+  avptcount+=imult;
+  avpt+=pt;
+  avpt2+=pow(pt,2.);
   if(imult==0) {
     ++multlost;
     return;
@@ -216,6 +224,7 @@ void Qvec::add(int imult, comp Qn,
   // wBC2sum = 1;
   // AC = 1;
   double mult = (double) imult;
+  ncount+=imult;
   if(ANAL == N2SUB2 || ANAL == N3SUB2 || ANAL == N4SUB2 ||
      ANAL == N5SUB2 || ANAL == N6SUB2 || ANAL == N7SUB2) {
     wnAsum+=w2A*mult;
@@ -231,7 +240,7 @@ void Qvec::add(int imult, comp Qn,
     ABnorm = (Q2A/std::abs(Q2A)) * (std::conj(Q2B)/std::abs(Q2B));
     nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A));
 
-  } else if(ANAL == N42SUB2 || ANAL == N63SUB2) {
+  } else if(ANAL == N42SUB2 || ANAL == N63SUB2 ) {
     wnAsum+=w2A*w2A*mult;
     wABsum+=w2A*w2A*w2B*w2B;
     wnA2sum+=pow(w2A*w2A*mult,2);
@@ -244,6 +253,20 @@ void Qvec::add(int imult, comp Qn,
     rQnA2 += pow(nA.real(),2)/(mult*w2A*w2A);
     ABnorm = (Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) * (std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q2A)/std::abs(Q2A));
     nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A));
+
+  } else if(ANAL == N62SUB2) {
+    wnAsum+=w2A*w2A*w2A*mult;
+    wABsum+=w2A*w2A*w2A*w2B*w2B*w2B;
+    wnA2sum+=pow(w2A*w2A*w2A*mult,2);
+    wAB2sum+=pow(w2A*w2A*w2A*w2B*w2B*w2B,2);
+    AB = Q2B * Q2B*Q2B* std::conj(Q2A) * std::conj(Q2A)* std::conj(Q2A);
+    nA = Qn * std::conj(Q2A)*std::conj(Q2A)*std::conj(Q2A) ;
+    QAB += AB;
+    QnA += nA;
+    rQAB2 += pow(AB.real(),2)/(w2A*w2A*w2A*w2B*w2B*w2B);
+    rQnA2 += pow(nA.real(),2)/(mult*w2A*w2A*w2A);
+    ABnorm = (Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) * (std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A));
+    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A));
 
   } else if(ANAL == D24SUB2 || ANAL == D34SUB2) {
     wnAsum+=w2A*w2A*mult*mult;
@@ -259,47 +282,47 @@ void Qvec::add(int imult, comp Qn,
     ABnorm = (Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) * (std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q2A)/std::abs(Q2A));
     nAnorm = Qn* Qn *(std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A));
 
-  } else if(ANAL == N523SUB2 || ANAL == D2232SUB2 || ANAL == D2432SUB2) {
-    wnAsum+=w2A*w3A*mult;
-    wABsum+=w2A*w3A*w2B*w3B;
-    wnA2sum+=pow(w2A*w3A*mult,2);
-    wAB2sum+=pow(w2A*w3A*w2B*w3B,2);
-    AB = Q2B * Q3B* std::conj(Q2A) * std::conj(Q3A);
-    nA = Qn * std::conj(Q2A)*std::conj(Q3A) ;
+  } else if(ANAL == N523SUB2 || ANAL == N523ASUB2 || ANAL == D2232SUB2|| ANAL == D2232ASUB2 ) {
+    double w23A = w2A*w3A;
+    double w23B = w2B*w3B;
+    comp Q23B = Q2B * Q3B;
+    comp Q23Acomp = std::conj(Q2A) * std::conj(Q3A);
+    comp norm23B = std::abs(Q2B)*std::abs(Q3B);
+    comp norm23A = std::abs(Q2A)*std::abs(Q3A);
+    if(ANAL == D2232SUB2 || ANAL == D2232ASUB2) mult = pow(mult,2);
+    wnAsum+=w23A*mult;
+    wABsum+=w23A*w23B;
+    wnA2sum+=pow(w23A*mult,2);
+    wAB2sum+=pow(w23A*w23B,2);
+    AB = Q23B* Q23Acomp;
+    nA = Qn * Q23Acomp ;
     QAB += AB;
     QnA += nA;
-    rQAB2 += pow(AB.real(),2)/(w2A*w3A*w2B*w3B);
-    rQnA2 += pow(nA.real(),2)/( mult*w2A*w3A);
-    ABnorm = (Q2B/std::abs(Q2B)) *(Q3B/std::abs(Q3B)) * (std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q3A)/std::abs(Q3A));
-    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q3A)/std::abs(Q3A));
+    rQAB2 += pow(AB.real(),2)/(w23A*w23B);
+    rQnA2 += pow(nA.real(),2)/( mult*w23A);
+    ABnorm = Q23B*Q23Acomp/(norm23B*norm23A);
+    nAnorm = nA/norm23A;
 
-  } else if(ANAL == D2432SUB2) {
-    wnAsum+=w2A*w2A*w3A*mult;
-    wABsum+=w2A*w2A*w3A*w2B*w2B*w3B;
-    wnA2sum+=pow(w2A*w2A*w3A*mult,2);
-    wAB2sum+=pow(w2A*w2A*w3A*w2B*w2B*w3B,2);
-    AB = Q2B * Q2B * Q3B* std::conj(Q2A) * std::conj(Q2A)*std::conj(Q3A);
-    nA = Qn * std::conj(Q2A)*std::conj(Q2A)* std::conj(Q3A) ;
-    QAB += AB;
-    QnA += nA;
-    rQAB2 += pow(AB.real(),2)/(w2A*w2A*w3A*w2B*w2B*w3B);
-    rQnA2 += pow(nA.real(),2)/( mult*w2A*w2A*w3A);
-    ABnorm = (Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) *(Q3B/std::abs(Q3B)) * (std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q3A)/std::abs(Q3A));
-    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q3A)/std::abs(Q3A));
-
-  } else if(ANAL == N723SUB2) {
-    wnAsum+=w2A*w2A*w3A*mult;
-    wABsum+=w2A*w2A*w3A*w2B*w2B*w3B;
-    wnA2sum+=pow(w2A*w2A*w3A*mult,2);
-    wAB2sum+=pow(w2A*w2A*w3A*w2B*w2B*w3B,2);
-    AB = Q2B * Q2B * Q3B* std::conj(Q2A) * std::conj(Q2A)* std::conj(Q3A);
+  } else if(ANAL == D2432SUB2 ||ANAL == D2432ASUB2 || ANAL == N723SUB2 || ANAL == N723ASUB2) {
+    double w223A = w2A*w2A*w3A;
+    double w223B = w2B*w2B*w3B;
+    comp Q223B = Q2B * Q2B * Q3B;
+    comp Q223Acomp = std::conj(Q2A) * std::conj(Q2A) * std::conj(Q3A);
+    comp norm223B = pow(std::abs(Q2B),2.)*std::abs(Q3B);
+    comp norm223A = pow(std::abs(Q2A),2.)*std::abs(Q2A);
+    if(ANAL==D2432SUB2 || ANAL==D2432ASUB2) mult=pow(mult,3);
+    wnAsum+=w223A*mult;
+    wABsum+=w223A*w223B;
+    wnA2sum+=pow(w223A*mult,2);
+    wAB2sum+=pow(w223A*w223B,2);
+    AB = Q223B* Q223Acomp;
     nA = Qn * std::conj(Q2A)*std::conj(Q2A)*std::conj(Q3A) ;
     QAB += AB;
     QnA += nA;
-    rQAB2 += pow(AB.real(),2)/(w2A*w2A*w3A*w2B*w2B*w3B);
-    rQnA2 += pow(nA.real(),2)/(mult*w2A*w2A*w3A);
-    ABnorm = (Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) *(Q3B/std::abs(Q3B)) * (std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q2A)/std::abs(Q2A)) *(std::conj(Q3A)/std::abs(Q3A));
-    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q3A)/std::abs(Q3A));
+    rQAB2 += pow(AB.real(),2)/(w223A*w223B);
+    rQnA2 += pow(nA.real(),2)/(mult*w223A);
+    ABnorm = AB/norm223B*norm223A;
+    nAnorm = nA/norm223A;
 
   } else if(ANAL == N2SUB3 || ANAL == N3SUB3 || ANAL == N4SUB3 || 
 	    ANAL == N5SUB3 || ANAL == N6SUB3 || ANAL == N7SUB3) {
@@ -328,31 +351,78 @@ void Qvec::add(int imult, comp Qn,
     BCnorm = (Q2C/std::abs(Q2C)) * (std::conj(Q2B)/std::abs(Q2B));  
     nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A));
 
-  } else if(ANAL == N42SUB3 || ANAL == N63SUB3) {
-    wnAsum+=w2A*w2A*mult;
-    wABsum+=w2A*w2A*w2B*w2B;
-    wACsum+=w2A*w2A*w2C*w2C;
-    wBCsum+=w2B*w2B*w2C*w2C;
-    wnA2sum+=pow(w2A*w2A*mult,2);
-    wAB2sum+=pow(w2A*w2B,4);
-    wAC2sum+=pow(w2A*w2C,4);
-    wBC2sum+=pow(w2B*w2C,4);
-    AB = Q2B * Q2B * std::conj(Q2A) * std::conj(Q2A);
-    AC = Q2C * Q2C * std::conj(Q2A) * std::conj(Q2A);
-    BC = Q2C * Q2C * std::conj(Q2B) * std::conj(Q2B);  
-    nA = Qn * std::conj(Q2A) * std::conj(Q2A) ;
+  } else if(ANAL == N42SUB3 || ANAL == N63SUB3 ) {
+    double w22A = w2A*w2A;
+    double w22B = w2B*w2B;
+    double w22C = w2C*w2C;
+    comp Q22B = Q2B * Q2B;
+    comp Q22C = Q2C * Q2C;
+    comp Q22Acomp = std::conj(Q2A) * std::conj(Q2A);
+    comp Q22Bcomp = std::conj(Q2B) * std::conj(Q2B);
+    comp norm22A = std::abs(Q2A)*std::abs(Q2A);
+    comp norm22B = std::abs(Q2B)*std::abs(Q2B);
+    comp norm22C = std::abs(Q2C)*std::abs(Q2C);
+    wnAsum+=w22A*mult;
+    wABsum+=w22A*w22B;
+    wACsum+=w22A*w22C;
+    wBCsum+=w22B*w22C;
+    wnA2sum+=pow(w22A*mult,2);
+    wAB2sum+=pow(w22A*w22B,2);
+    wAC2sum+=pow(w22A*w22C,2);
+    wBC2sum+=pow(w22B*w22C,2);
+    AB = Q22B * Q22Acomp;
+    AC = Q22C * Q22Acomp;
+    BC = Q22C * Q22Bcomp;  
+    nA = Qn * Q22Acomp ;
     QAB += AB;
     QAC += AC;
     QBC += BC;
     QnA += nA;
-    rQAB2 += pow(AB.real(),2)/pow(w2A*w2B,2);
-    rQAC2 += pow(AC.real(),2)/pow(w2A*w2C,2);
-    rQBC2 += pow(BC.real(),2)/pow(w2B*w2C,2);
-    rQnA2 += pow(nA.real(),2)/(mult*w2A*w2A);
-    ABnorm = (Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q2A)/std::abs(Q2A));
-    ACnorm = (Q2C/std::abs(Q2C)) *(Q2C/std::abs(Q2C)) * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q2A)/std::abs(Q2A));
-    BCnorm = (Q2C/std::abs(Q2C)) *(Q2C/std::abs(Q2C)) * (std::conj(Q2B)/std::abs(Q2B))* (std::conj(Q2B)/std::abs(Q2B));  
-    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q2A)/std::abs(Q2A));
+    rQAB2 += pow(AB.real(),2)/(w22A*w22B);
+    rQAC2 += pow(AC.real(),2)/(w22A*w22C);
+    rQBC2 += pow(BC.real(),2)/(w22B*w22C);
+    rQnA2 += pow(nA.real(),2)/(mult*w22A);
+    ABnorm = Q22B*Q22Acomp/(norm22A*norm22B);
+    ACnorm = Q22C*Q22Acomp/(norm22A*norm22C);
+    BCnorm = Q22C*Q22Bcomp/(norm22C*norm22B);
+    nAnorm = Qn*Q22Acomp/norm22A;
+
+  } else if(ANAL == N62SUB3) {
+    double w222A = w2A*w2A*w2A;
+    double w222B = w2B*w2B*w2B;
+    double w222C = w2C*w2C*w2C;
+    comp Q222B = Q2B * Q2B * Q2B;
+    comp Q222C = Q2C * Q2C * Q2C;
+    comp Q222Acomp = std::conj(Q2A) *std::conj(Q2A) * std::conj(Q2A);
+    comp Q222Bcomp = std::conj(Q2B) *std::conj(Q2B) * std::conj(Q2B);
+    comp norm222A = std::abs(Q2A)*std::abs(Q2A)*std::abs(Q2A);
+    comp norm222B = std::abs(Q2B)*std::abs(Q2B)*std::abs(Q2B);
+    comp norm222C = std::abs(Q2C)*std::abs(Q2C)*std::abs(Q2C);
+    wnAsum+=w222A*mult;
+    wABsum+=w222A*w222B;
+    wACsum+=w222A*w222C;
+    wBCsum+=w222B*w222C;
+    wnA2sum+=pow(w222A*mult,2);
+    wAB2sum+=pow(w222A*w222B,2);
+    wAC2sum+=pow(w222A*w222C,2);
+    wBC2sum+=pow(w222B*w222C,2);
+    AB = Q222B * Q222Acomp;
+    AC = Q222C * Q222Acomp;
+    BC = Q222C * Q222Bcomp;  
+    nA = Qn * Q222Acomp ;
+    QAB += AB;
+    QAC += AC;
+    QBC += BC;
+    QnA += nA;
+    rQAB2 += pow(AB.real(),2)/(w222A*w222B);
+    rQAC2 += pow(AC.real(),2)/(w222A*w222C);
+    rQBC2 += pow(BC.real(),2)/(w222B*w222C);
+    rQnA2 += pow(nA.real(),2)/(mult*w222A);
+    ABnorm = Q222B*Q222Acomp/(norm222A*norm222B);
+    ACnorm = Q222C*Q222Acomp/(norm222A*norm222C);
+    BCnorm = Q222C*Q222Bcomp/(norm222C*norm222B);
+    nAnorm = Qn*Q222Acomp/norm222A;
+
 
   } else if(ANAL == D24SUB3 || ANAL == D34SUB3) {
     wnAsum+=w2A*w2A*mult*mult;
@@ -380,83 +450,80 @@ void Qvec::add(int imult, comp Qn,
     BCnorm = (Q2C/std::abs(Q2C)) *(Q2C/std::abs(Q2C)) * (std::conj(Q2B)/std::abs(Q2B))* (std::conj(Q2B)/std::abs(Q2B));  
     nAnorm = Qn * Qn* (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q2A)/std::abs(Q2A));
 
-  } else if(ANAL == N523SUB3 || ANAL == D2232SUB3 ) {
-    wnAsum+=w2A*w3A*mult;
-    wABsum+=w2A*w3A*w2B*w3B;
-    wACsum+=w2A*w3A*w2C*w3C;
-    wBCsum+=w2B*w3B*w2C*w3C;
-    wnA2sum+=pow(w2A*w3A*mult,2);
-    wAB2sum+=pow(w2A*w3A*w2B*w3B,2);
-    wAC2sum+=pow(w2A*w3A*w2C*w3C,2);
-    wBC2sum+=pow(w2B*w3B*w2C*w3C,2);
-    AB = Q2B * Q3B * std::conj(Q2A) * std::conj(Q3A);
-    AC = Q2C * Q3C * std::conj(Q2A) * std::conj(Q3A);
-    BC = Q2C * Q3C * std::conj(Q2B) * std::conj(Q3B);  
-    nA = Qn * std::conj(Q2A) * std::conj(Q3A) ;
+  } else if(ANAL == N523SUB3 || ANAL == N523ASUB3 || ANAL == D2232SUB3|| ANAL == D2232ASUB3 ) {
+    double w23A = w2A*w3A;
+    double w23B = w2B*w3B;
+    double w23C = w2C*w3C;
+    comp Q23B = Q2B * Q3B;
+    comp Q23C = Q2C * Q3C;
+    comp Q23Acomp = std::conj(Q2A) * std::conj(Q3A);
+    comp Q23Bcomp = std::conj(Q2B) * std::conj(Q3B);
+    comp norm23A = std::abs(Q2A)*std::abs(Q3A);
+    comp norm23B = std::abs(Q2B)*std::abs(Q3B);
+    comp norm23C = std::abs(Q2C)*std::abs(Q3C);
+    if(ANAL==D2232SUB3 || ANAL==D2232ASUB3) mult=pow(mult,2);
+    wnAsum+=w23A*mult;
+    wABsum+=w23A*w23B;
+    wACsum+=w23A*w23C;
+    wBCsum+=w23B*w23C;
+    wnA2sum+=pow(w23A*mult,2);
+    wAB2sum+=pow(w23A*w23B,2);
+    wAC2sum+=pow(w23A*w23C,2);
+    wBC2sum+=pow(w23B*w23C,2);
+    AB = Q23B * Q23Acomp;
+    AC = Q23C * Q23Acomp;
+    BC = Q23C * Q23Bcomp;  
+    nA = Qn * Q23Acomp ;
     QAB += AB;
     QAC += AC;
     QBC += BC;
     QnA += nA;
-    rQAB2 += pow(AB.real(),2)/(w2A*w3A*w2B*w3B);
-    rQAC2 += pow(AC.real(),2)/(w2A*w3A*w2C*w3C);
-    rQBC2 += pow(BC.real(),2)/(w2B*w3B*w2C*w3C);
-    rQnA2 += pow(nA.real(),2)/(mult*w2A*w3A);
-    ABnorm = (Q2B/std::abs(Q2B)) *(Q3B/std::abs(Q3B)) * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
-    ACnorm = (Q2C/std::abs(Q2C)) *(Q3C/std::abs(Q3C)) * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
-    BCnorm = (Q2C/std::abs(Q2C)) *(Q3C/std::abs(Q3C)) * (std::conj(Q2B)/std::abs(Q2B))* (std::conj(Q3B)/std::abs(Q3B));  
-    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
+    rQAB2 += pow(AB.real(),2)/(w23A*w23B);
+    rQAC2 += pow(AC.real(),2)/(w23A*w23C);
+    rQBC2 += pow(BC.real(),2)/(w23B*w23C);
+    rQnA2 += pow(nA.real(),2)/(mult*w23A);
+    ABnorm = Q23B*Q23Acomp/(norm23A*norm23B);
+    ACnorm = Q23C*Q23Acomp/(norm23A*norm23C);
+    BCnorm = Q23C*Q23Bcomp/(norm23C*norm23B);
+    nAnorm = Qn*Q23Acomp/norm23A;
 
-  } else if(ANAL==D2432SUB3) {
-    wnAsum+=w2A*w2A*w3A*mult;
-    wABsum+=w2A*w2A*w3A*w2B*w2B*w3B;
-    wACsum+=w2A*w2A*w3A*w2C*w2C*w3C;
-    wBCsum+=w2B*w2B*w3B*w2C*w2C*w3C;
-    wnA2sum+=pow(w2A*w2A*w3A*mult,2);
-    wAB2sum+=pow(w2A*w2A*w3A*w2B*w2B*w3B,2);
-    wAC2sum+=pow(w2A*w2A*w3A*w2C*w2C*w3C,2);
-    wBC2sum+=pow(w2B*w2B*w3B*w2C*w2C*w3C,2);
-    AB = Q2B * Q2B * Q3B * std::conj(Q2A) * std::conj(Q2A) * std::conj(Q3A);
-    AC = Q2C * Q2C * Q3C * std::conj(Q2A) * std::conj(Q2A) * std::conj(Q3A);
-    BC = Q2C * Q2C * Q3C * std::conj(Q2B) *std::conj(Q2B) * std::conj(Q3B);  
-    nA = Qn * std::conj(Q2A) *std::conj(Q2A) * std::conj(Q3A) ;
+  } else if(ANAL==D2432SUB3 ||ANAL==D2432ASUB3 || ANAL == N723SUB3 || ANAL == N723ASUB3) {
+    double w23A = w2A*w2A*w3A;
+    double w23B = w2B*w2B*w3B;
+    double w23C = w2C*w2C*w3C;
+    comp Q23B = Q2B * Q2B * Q3B;
+    comp Q23C = Q2C * Q2C * Q3C;
+    comp Q23Acomp = std::conj(Q2A) *std::conj(Q2A) * std::conj(Q3A);
+    comp Q23Bcomp = std::conj(Q2B) *std::conj(Q2B) * std::conj(Q3B);
+    comp norm23A = std::abs(Q2A)*std::abs(Q2A)*std::abs(Q3A);
+    comp norm23B = std::abs(Q2B)*std::abs(Q2B)*std::abs(Q3B);
+    comp norm23C = std::abs(Q2C)*std::abs(Q2C)*std::abs(Q3C);
+    if(ANAL==D2432SUB3 || ANAL==D2432ASUB3) mult=pow(mult,3);
+    wnAsum+=w23A*mult;
+    wABsum+=w23A*w23B;
+    wACsum+=w23A*w23C;
+    wBCsum+=w23B*w23C;
+    wnA2sum+=pow(w23A*mult,2);
+    wAB2sum+=pow(w23A*w23B,2);
+    wAC2sum+=pow(w23A*w23C,2);
+    wBC2sum+=pow(w23B*w23C,2);
+    AB = Q23B * Q23Acomp;
+    AC = Q23C * Q23Acomp;
+    BC = Q23C * Q23Bcomp;  
+    nA = Qn * Q23Acomp ;
     QAB += AB;
     QAC += AC;
     QBC += BC;
     QnA += nA;
-    rQAB2 += pow(AB.real(),2)/(w2A*w2A*w3A*w2B*w2B*w3B);
-    rQAC2 += pow(AC.real(),2)/(w2A*w2A*w3A*w2C*w2C*w3C);
-    rQBC2 += pow(BC.real(),2)/(w2B*w2B*w3B*w2C*w2C*w3C);
-    rQnA2 += pow(nA.real(),2)/(mult*w2A*w2A*w3A);
-    ABnorm = (Q2B/std::abs(Q2B)) * (Q2B/std::abs(Q2B)) * (Q3B/std::abs(Q3B)) * (std::conj(Q2A)/std::abs(Q2A)) * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
-    ACnorm = (Q2C/std::abs(Q2C)) * (Q2C/std::abs(Q2C)) * (Q3C/std::abs(Q3C)) * (std::conj(Q2A)/std::abs(Q2A)) * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
-    BCnorm = (Q2C/std::abs(Q2C)) * (Q2C/std::abs(Q2C)) * (Q3C/std::abs(Q3C)) * (std::conj(Q2B)/std::abs(Q2B)) * (std::conj(Q2B)/std::abs(Q2B))* (std::conj(Q3B)/std::abs(Q3B));  
-    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
+    rQAB2 += pow(AB.real(),2)/(w23A*w23B);
+    rQAC2 += pow(AC.real(),2)/(w23A*w23C);
+    rQBC2 += pow(BC.real(),2)/(w23B*w23C);
+    rQnA2 += pow(nA.real(),2)/(mult*w23A);
+    ABnorm = Q23B*Q23Acomp/(norm23A*norm23B);
+    ACnorm = Q23C*Q23Acomp/(norm23A*norm23C);
+    BCnorm = Q23C*Q23Bcomp/(norm23C*norm23B);
+    nAnorm = Qn*Q23Acomp/norm23A;
 
-  } else if(ANAL == N723SUB3 ) {
-    wnAsum+=w2A*w2A*w3A*mult;
-    wABsum+=w2A*w2A*w3A*w2B*w2B*w3B;
-    wACsum+=w2A*w2A*w3A*w2C*w2C*w3C;
-    wBCsum+=w2B*w2B*w3B*w2C*w2C*w3C;
-    wnA2sum+=pow(w2A*w2A*w3A*mult,2);
-    wAB2sum+=pow(w2A*w2A*w3A*w2B*w2B*w3B,2);
-    wAC2sum+=pow(w2A*w2A*w3A*w2C*w2C*w3C,2);
-    wBC2sum+=pow(w2B*w2B*w3B*w2C*w2C*w3C,2);
-    AB = Q2B * Q2B *Q3B * std::conj(Q2A) * std::conj(Q2A) * std::conj(Q3A);
-    AC = Q2C * Q2C *Q3C * std::conj(Q2A) * std::conj(Q2A) * std::conj(Q3A);
-    BC = Q2C * Q2C *Q3C * std::conj(Q2B) * std::conj(Q2B) * std::conj(Q3B);  
-    nA = Qn * std::conj(Q2A) *std::conj(Q2A) * std::conj(Q3A) ;
-    QAB += AB;
-    QAC += AC;
-    QBC += BC;
-    QnA += nA;
-    rQAB2 += pow(AB.real(),2)/(w2A*w2A*w3A*w2B*w2B*w3B);
-    rQAC2 += pow(AC.real(),2)/(w2A*w2A*w3A*w2C*w2C*w3C);
-    rQBC2 += pow(BC.real(),2)/(w2B*w2B*w3B*w2C*w2C*w3C);
-    rQnA2 += pow(nA.real(),2)/(mult*w2A*w2A*w3A);
-    ABnorm = (Q2B/std::abs(Q2B)) *(Q2B/std::abs(Q2B)) *(Q3B/std::abs(Q3B)) * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
-    ACnorm = (Q2C/std::abs(Q2C)) *(Q2C/std::abs(Q2C)) *(Q3C/std::abs(Q3C)) * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
-    BCnorm = (Q2C/std::abs(Q2C)) *(Q2C/std::abs(Q2C)) *(Q3C/std::abs(Q3C)) * (std::conj(Q2B)/std::abs(Q2B))*(std::conj(Q2B)/std::abs(Q2B))* (std::conj(Q3B)/std::abs(Q3B));  
-    nAnorm = Qn * (std::conj(Q2A)/std::abs(Q2A))*(std::conj(Q2A)/std::abs(Q2A))* (std::conj(Q3A)/std::abs(Q3A));
   }
 
   QABnorm += ABnorm;
@@ -474,9 +541,7 @@ void Qvec::add(int imult, comp Qn,
   rQnAnorm2 += pow(nAnorm.real(),2);
   
   ++nevts;
-  ncount+=mult;
-  avpt+=pt;
-  avpt2+=pow(pt,2.);
+  sumw+=mult;
   avnoff+=noff;
   avnoff2+=pow(noff,2.);
   return;
@@ -532,14 +597,14 @@ double Qvec::getRescorErr(){
 }
 
 double Qvec::getEPVNobs(){
-  double na = QnAnorm.real()/(double) ncount;
+  double na = QnAnorm.real()/sumw;
   return na;
 }
 
 double Qvec::getEPVNobsErr(){
-  double muna = rQnAnorm/(double) ncount;
-  double varna = rQnAnorm2/(double) ncount - pow(muna,2.);
-  double signa = sqrt(varna/(double) ncount);
+  double muna = rQnAnorm/sumw;
+  double varna = rQnAnorm2/sumw - pow(muna,2.);
+  double signa = sqrt(varna/sumw);
   double err = 0;
   try{ err = 0.5*getEPVNobs()*signa/muna;}
   catch(const std::exception&) {err = 0;};
@@ -615,7 +680,7 @@ double Qvec::getSPVNnum(){
 double Qvec::getSPVNnumerr(){
   double muna = rQnA/wnAsum;
   double varna = rQnA2/wnAsum - pow(muna,2.);
-  double signa = sqrt(varna/(double) ncount);
+  double signa = sqrt(varna/sumw);
   double err = 0;
   if(muna>0) { err = getSPVNnum()*signa/muna;}
   return err;
@@ -681,7 +746,7 @@ double Qvec::getEPVN(){
   if( twosub ) {
     if(nevts>0 && ncount > 0) {
       double ab = QABnorm.real()/(double) nevts;
-      double na = QnAnorm.real()/(double) ncount;
+      double na = QnAnorm.real()/sumw;
       double res = 0;
       if( ab>0) { 
 	res = sqrt( ab ); 
@@ -694,7 +759,7 @@ double Qvec::getEPVN(){
       double ab = QABnorm.real()/(double) nevts;
       double ac = QACnorm.real()/(double) nevts;
       double bc = QBCnorm.real()/(double) nevts;
-      double na = QnAnorm.real()/(double) ncount;
+      double na = QnAnorm.real()/sumw;
       double res = 0;
       if(bc>0 && ab*ac>0) { 
 	res = sqrt( ab*ac/bc ); 
@@ -708,11 +773,11 @@ double Qvec::getEPVN(){
 double Qvec::getEPVNErr(){
   if( twosub ) {
     double muab = rQABnorm/(double) nevts;
-    double muna = rQnAnorm/(double) ncount;
+    double muna = rQnAnorm/sumw;
     double varab = rQABnorm2/(double)nevts - pow(muab,2.);
-    double varna = rQnAnorm2/(double)ncount - pow(muna,2.);
+    double varna = rQnAnorm2/sumw - pow(muna,2.);
     double sigab = sqrt(varab/(double) nevts);
-    double signa = sqrt(varna/(double) ncount);
+    double signa = sqrt(varna/sumw);
     double err = 0;
     try{ err = 0.5*getEPVN()*sqrt( pow(sigab/muab,2.) + pow(signa/muna,2.));}
     catch(const std::exception&) {err = 0;};
@@ -721,15 +786,15 @@ double Qvec::getEPVNErr(){
     double muab = rQABnorm/(double) nevts;
     double muac = rQACnorm/(double) nevts;
     double mubc = rQBCnorm/(double) nevts;
-    double muna = rQnAnorm/(double) ncount;
+    double muna = rQnAnorm/sumw;
     double varab = rQABnorm2/(double)nevts - pow(muab,2.);
     double varac = rQACnorm2/(double)nevts - pow(muac,2.);
     double varbc = rQBCnorm2/(double)nevts - pow(mubc,2.);
-    double varna = rQnAnorm2/(double)ncount - pow(muna,2.);
+    double varna = rQnAnorm2/sumw - pow(muna,2.);
     double sigab = sqrt(varab/(double) nevts);
     double sigac = sqrt(varac/(double) nevts);
     double sigbc = sqrt(varbc/(double) nevts);
-    double signa = sqrt(varna/(double) ncount);
+    double signa = sqrt(varna/sumw);
     double err = 0;
     try{ err = 0.5*getEPVN()*sqrt( pow(sigab/muab,2.) + pow(sigac/muac,2.) + pow(sigbc/mubc,2.) + pow(signa/muna,2.));}
     catch(const std::exception&) {err = 0;};
@@ -740,15 +805,15 @@ double Qvec::getEPVNErr(){
 double Qvec::getAvPt(){
   double ravpt = 0;
   if(ncount> 0) {
-    ravpt =  avpt/(double) ncount;
+    ravpt =  avpt/(double) avptcount;
   }
   return ravpt;
 }
 
 double Qvec::getAvPtErr(){
-  double mupt = avpt/(double)ncount;
-  double varpt = avpt2/(double)ncount - pow(mupt,2.);
-  double sigpt = sqrt(varpt/(double)ncount);
+  double mupt = avpt/sumw;
+  double varpt = avpt2/sumw - pow(mupt,2.);
+  double sigpt = sqrt(varpt/sumw);
   double err = 0;
   try{ err = 0.5*getAvPt()*sigpt/mupt;}
   catch(const std::exception&) {err = 0;};
