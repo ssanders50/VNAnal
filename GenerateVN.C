@@ -21,7 +21,7 @@ int epord_ = 2.;
 bool trkoff = true;
 bool RECENTERTRACKS = false;
 
-static const int MaxFiles = 200;
+static const int MaxFiles = 300;
 static const double MaxCent = 70;
 static const int MaxEvents = -1;
 static const int ntrkbins = 15;
