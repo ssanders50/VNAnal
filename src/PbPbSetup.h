@@ -5,7 +5,8 @@ if(reac.Contains("PbPb")){
   ep3c = hi::trackmid3;
   mid3n = "trackmid3";
   for(int i = 0; i<nanals; i++) if(AnalNames[i] == anal) {ANAL = i; break;}
-  if(anal=="N2SUB2" || anal=="N2SUB3" || anal=="D24SUB2" || anal=="D24SUB3") {
+  cout<<"PbPbSetup anal: "<<anal<<" enum: "<<ANAL<<endl;
+  if(anal=="N2SUB2" || anal=="N2SUB3" || anal=="D24SUB2" || anal=="D24SUB3" || anal=="D26SUB2" || anal=="D26SUB3") {
     epord_ = 2;
     trig  = "crab_PbPb_2015_v2_A";
     trig2 = "crab_PbPb_2015_v2_B";
