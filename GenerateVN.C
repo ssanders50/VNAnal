@@ -21,14 +21,14 @@ int epord_ = 2.;
 bool trkoff = true;
 bool RECENTERTRACKS = false;
 
-static const int MaxFiles = 300;
+static const int MaxFiles = 1000;
 static const double MaxCent = 70;
 static const int MaxEvents = -1;
 static const int ntrkbins = 15;
 static const double trkBins[]={0,20,30,40,50,60,80,100,120,150,185,220,260,300,350,500};
 static const int ncentbins = 12;
 static const double centBins[]={0,5,10,15,20,25,30,35,40,45,50,60,70};
-static const int nanals = 38;
+static const int nanals = 40;
 enum AnalType {
   N2SUB2,       N2SUB3,      N3SUB2,     N3SUB3,     N4SUB2,      N4SUB3,  
   N42SUB2,      N42SUB3,     N5SUB2,     N5SUB3,     N6SUB2,      N6SUB3,   
@@ -36,7 +36,7 @@ enum AnalType {
   N723ASUB2,    N723ASUB3,   N62SUB2,    N62SUB3,    N63SUB2,     N63SUB3,  
   D24SUB2,      D24SUB3,     D34SUB2,    D34SUB3,    D2232SUB2,   D2232SUB3,
   D2432SUB2,    D2432SUB3,   D2232ASUB2, D2232ASUB3, D2432ASUB2,  D2432ASUB3,
-  N523ASUB2,    N523ASUB3
+  N523ASUB2,    N523ASUB3,   D26SUB2,    D26SUB3
 };
 string AnalNames[]={
   "N2SUB2",       "N2SUB3",      "N3SUB2",     "N3SUB3",     "N4SUB2",      "N4SUB3",  
@@ -45,7 +45,7 @@ string AnalNames[]={
   "N723ASUB2",    "N723ASUB3",   "N62SUB2",    "N62SUB3",    "N63SUB2",     "N63SUB3",  
   "D24SUB2",      "D24SUB3",     "D34SUB2",    "D34SUB3",    "D2232SUB2",   "D2232SUB3",
   "D2432SUB2",    "D2432SUB3",   "D2232ASUB2", "D2232ASUB3", "D2432ASUB2",  "D2432ASUB3",
-  "N523ASUB2",    "N523ASUB3"
+  "N523ASUB2",    "N523ASUB3",   "D26SUB2",    "D26SUB3"
 };
 int ANAL;
 int epa;
@@ -138,6 +138,7 @@ void GenerateVN(string anal="", TString reac="", int NTRK = 160) {
   TString trig3;
   TString mid2n;
   TString mid3n;
+  cout<<"Enter GenerateVN: anal: "<<anal<<endl;
 #include "src/PbPbSetup.h"
 #include "src/pPbSetup.h"
 
